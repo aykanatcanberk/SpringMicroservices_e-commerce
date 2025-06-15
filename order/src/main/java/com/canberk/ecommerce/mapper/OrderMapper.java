@@ -1,6 +1,7 @@
 package com.canberk.ecommerce.mapper;
 
 import com.canberk.ecommerce.dto.OrderRequest;
+import com.canberk.ecommerce.dto.OrderResponse;
 import com.canberk.ecommerce.entity.Order;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
@@ -16,5 +17,16 @@ public class OrderMapper {
                 .totalAmount(request.amount())
                 .paymentMethod(request.paymentMethod())
                 .build();
+    }
+
+    public OrderResponse fromOrder(Order order) {
+
+        return new OrderResponse(
+                order.getId(),
+                order.getReference(),
+                order.getTotalAmount(),
+                order.getPaymentMethod(),
+                order.getCustomerId()
+        );
     }
 }
