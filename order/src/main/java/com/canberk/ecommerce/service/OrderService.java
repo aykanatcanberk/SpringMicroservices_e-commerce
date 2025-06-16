@@ -8,6 +8,8 @@ import com.canberk.ecommerce.exception.BusinessException;
 import com.canberk.ecommerce.kafka.OrderConfirmation;
 import com.canberk.ecommerce.kafka.OrderProducer;
 import com.canberk.ecommerce.mapper.OrderMapper;
+import com.canberk.ecommerce.payment.PaymentClient;
+import com.canberk.ecommerce.payment.PaymentRequest;
 import com.canberk.ecommerce.product.ProductClient;
 import com.canberk.ecommerce.product.PurchaseRequest;
 import com.canberk.ecommerce.repository.OrderRepository;
@@ -29,6 +31,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
 
     public List<OrderResponse> findAllOrders() {
         return orderRepository.findAll().stream()
@@ -60,6 +63,15 @@ public class OrderService {
                     )
             );
         }
+
+        var paymentRequest = new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                order.getId(),
+                order.getReference(),
+                customer
+        );
+        paymentClient.requestOrderPayment(paymentRequest);
 
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
